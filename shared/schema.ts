@@ -12,7 +12,8 @@ export const salespersons = pgTable("salespersons", {
 export const salesEntries = pgTable("sales_entries", {
   id: serial("id").primaryKey(),
   date: date("date").notNull(),
-  salespersonId: integer("salesperson_id").notNull().references(() => salespersons.id),
+  salespersonId: integer("salesperson_id").references(() => salespersons.id),
+  salespersonName: text("salesperson_name").notNull(),
   cashCollected: decimal("cash_collected", { precision: 10, scale: 2 }).notNull().default("0"),
   phonepeCollected: decimal("phonepe_collected", { precision: 10, scale: 2 }).notNull().default("0"),
   expenses: decimal("expenses", { precision: 10, scale: 2 }).notNull().default("0"),

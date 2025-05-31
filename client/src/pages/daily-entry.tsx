@@ -16,18 +16,12 @@ import { Save, Undo, Wallet, Smartphone, Receipt, Plus, Trash2, Calculator, Tren
 import { z } from "zod";
 
 const formSchema = insertSalesEntrySchema.extend({
-  salespersonId: z.string().optional(),
-  manualSalespersonName: z.string().optional(),
+  salespersonName: z.string().min(1, "Salesperson name is required"),
   individualPayments: z.array(z.object({
     customerName: z.string().min(1, "Customer name is required"),
     amount: z.string().min(1, "Amount is required"),
     paymentMethod: z.enum(["cash", "phonepe"]),
   })).optional(),
-}).refine((data) => {
-  return (data.salespersonId && data.salespersonId.trim()) || (data.manualSalespersonName && data.manualSalespersonName.trim());
-}, {
-  message: "Please either select a salesperson or enter a manual name",
-  path: ["manualSalespersonName"],
 });
 
 const dailySummarySchema = insertDailySummarySchema.extend({
@@ -73,8 +67,7 @@ export default function DailyEntry() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: todayDate,
-      salespersonId: "",
-      manualSalespersonName: "",
+      salespersonName: "",
       cashCollected: "0",
       phonepeCollected: "0",
       expenses: "0",
@@ -286,70 +279,23 @@ export default function DailyEntry() {
                     )}
                   />
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Salesperson</FormLabel>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setUseManualSalesperson(!useManualSalesperson);
-                          // Clear both fields when toggling
-                          form.setValue("salespersonId", "");
-                          form.setValue("manualSalespersonName", "");
-                          // Clear any validation errors
-                          form.clearErrors("salespersonId");
-                          form.clearErrors("manualSalespersonName");
-                        }}
-                      >
-                        {useManualSalesperson ? "Select from List" : "Enter Manually"}
-                      </Button>
-                    </div>
-                    
-                    {!useManualSalesperson ? (
-                      <FormField
-                        control={form.control}
-                        name="salespersonId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="business-input">
-                                  <SelectValue placeholder="Select Salesperson" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {salespersons.map((person: any) => (
-                                  <SelectItem key={person.id} value={person.id.toString()}>
-                                    {person.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ) : (
-                      <FormField
-                        control={form.control}
-                        name="manualSalespersonName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="Enter salesperson name"
-                                {...field}
-                                className="business-input"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  <FormField
+                    control={form.control}
+                    name="salespersonName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Salesperson Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter salesperson name"
+                            {...field}
+                            className="business-input"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </div>
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
