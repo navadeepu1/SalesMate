@@ -117,7 +117,7 @@ export default function DailyEntry() {
       });
       form.reset({
         date: todayDate,
-        salespersonName: "",
+        salespersonName: "Gowri",
         cashCollected: "0",
         phonepeCollected: "0",
         expenses: "0",
