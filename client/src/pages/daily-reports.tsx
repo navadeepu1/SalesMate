@@ -25,25 +25,39 @@ export default function DailyReports() {
   };
 
   const handleExport = () => {
-    // Create CSV content
-    const headers = ['Salesperson', 'Cash', 'PhonePe', 'Expenses', 'Net Total'];
+    // Enhanced CSV export with better formatting and summary data
+    const reportSummary = [
+      ['Daily Sales Report'],
+      [`Date: ${new Date(reportDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`],
+      ['Generated on:', new Date().toLocaleString()],
+      [''],
+      ['SUMMARY TOTALS'],
+      ['Total Cash Collected:', `₹${dailySummary.totalCash.toLocaleString('en-IN')}`],
+      ['Total PhonePe Collected:', `₹${dailySummary.totalPhonepe.toLocaleString('en-IN')}`],
+      ['Total Expenses:', `₹${dailySummary.totalExpenses.toLocaleString('en-IN')}`],
+      ['Net Total:', `₹${dailySummary.netTotal.toLocaleString('en-IN')}`],
+      [''],
+      ['SALESPERSON BREAKDOWN']
+    ];
+    
+    const headers = ['Salesperson', 'Cash Collected', 'PhonePe Collected', 'Expenses', 'Net Total'];
     const rows = salespersonData.map((person: any) => [
       person.salesperson.name,
-      person.cash,
-      person.phonepe,
-      person.expenses,
-      person.net
+      `₹${person.cash.toLocaleString('en-IN')}`,
+      `₹${person.phonepe.toLocaleString('en-IN')}`,
+      `₹${person.expenses.toLocaleString('en-IN')}`,
+      `₹${person.net.toLocaleString('en-IN')}`
     ]);
     
-    const csvContent = [headers, ...rows]
+    const csvContent = [...reportSummary, headers, ...rows]
       .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `daily-report-${reportDate}.csv`;
+    a.download = `Daily-Sales-Report-${reportDate}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };

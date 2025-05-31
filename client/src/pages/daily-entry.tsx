@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,7 +108,7 @@ export default function DailyEntry() {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Daily entry saved successfully!",
+        description: "Payment entry saved and all reports updated automatically!",
       });
       form.reset({
         date: todayDate,
@@ -119,8 +119,12 @@ export default function DailyEntry() {
         notes: "",
         individualPayments: [],
       });
+      // Real-time updates - invalidate all related queries for automatic refresh
       queryClient.invalidateQueries({ queryKey: ["/api/sales-entries/date"] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/salesperson-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sales-entries"] }); // Historical data
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-summary-detailed"] });
     },
     onError: (error: any) => {
       toast({
@@ -145,9 +149,13 @@ export default function DailyEntry() {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Daily summary saved successfully!",
+        description: "Daily summary saved and all reports updated automatically!",
       });
+      // Real-time updates - invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ["/api/daily-summary-detailed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/salesperson-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sales-entries"] }); // Historical data
       setShowDailySummary(false);
     },
     onError: (error: any) => {
@@ -187,36 +195,25 @@ export default function DailyEntry() {
     });
   };
 
-  const calculateClosingBalance = () => {
-    const openingCash = parseFloat(summaryForm.watch("openingCash")) || 0;
-    const totalCollection = parseFloat(summaryForm.watch("totalCollection")) || 0;
-    const totalSales = parseFloat(summaryForm.watch("totalSales")) || 0;
-    
-    // Calculate individual sales total
-    const individualSalesTotal = fields.reduce((total, sale) => {
-      const amount = parseFloat(summaryForm.watch(`individualSales.${fields.indexOf(sale)}.amount`)) || 0;
-      return total + amount;
-    }, 0);
+  const calculateClosingBalance = useCallback(() => {
+    const formValues = summaryForm.getValues();
+    const openingCash = parseFloat(formValues.openingCash) || 0;
+    const totalCollection = parseFloat(formValues.totalCollection) || 0;
+    const totalSales = parseFloat(formValues.totalSales) || 0;
     
     const closingBalance = openingCash + totalCollection - totalSales;
-    const currentClosingBalance = summaryForm.watch("closingBalance");
-    
-    // Only update if the value has actually changed to prevent infinite loop
-    if (currentClosingBalance !== closingBalance.toString()) {
-      summaryForm.setValue("closingBalance", closingBalance.toString());
-    }
-  };
+    summaryForm.setValue("closingBalance", closingBalance.toString(), { shouldValidate: false });
+  }, [summaryForm]);
 
   // Watch for changes to auto-calculate closing balance
   useEffect(() => {
     const subscription = summaryForm.watch((value, { name }) => {
-      // Only recalculate if the changed field is not closingBalance itself
-      if (name !== "closingBalance") {
+      if (name === "openingCash" || name === "totalCollection" || name === "totalSales") {
         calculateClosingBalance();
       }
     });
     return () => subscription.unsubscribe();
-  }, [summaryForm, fields]);
+  }, [summaryForm, calculateClosingBalance]);
 
   const addIndividualSale = () => {
     append({
