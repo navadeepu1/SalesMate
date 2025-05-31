@@ -24,10 +24,10 @@ const formSchema = insertSalesEntrySchema.extend({
     paymentMethod: z.enum(["cash", "phonepe"]),
   })).optional(),
 }).refine((data) => {
-  return data.salespersonId || data.manualSalespersonName;
+  return (data.salespersonId && data.salespersonId.trim()) || (data.manualSalespersonName && data.manualSalespersonName.trim());
 }, {
   message: "Please either select a salesperson or enter a manual name",
-  path: ["salespersonId"],
+  path: ["manualSalespersonName"],
 });
 
 const dailySummarySchema = insertDailySummarySchema.extend({
@@ -298,6 +298,9 @@ export default function DailyEntry() {
                           // Clear both fields when toggling
                           form.setValue("salespersonId", "");
                           form.setValue("manualSalespersonName", "");
+                          // Clear any validation errors
+                          form.clearErrors("salespersonId");
+                          form.clearErrors("manualSalespersonName");
                         }}
                       >
                         {useManualSalesperson ? "Select from List" : "Enter Manually"}
