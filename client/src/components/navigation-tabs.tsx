@@ -1,9 +1,8 @@
-import { PlusCircle, BarChart, History } from "lucide-react";
+import { PlusCircle, History } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 const tabs = [
   { id: "entry", label: "Daily Entry", icon: PlusCircle, path: "/" },
-  { id: "reports", label: "Daily Reports", icon: BarChart, path: "/reports" },
   { id: "history", label: "Historical Data", icon: History, path: "/history" },
 ];
 
