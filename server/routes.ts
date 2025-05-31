@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertSalesEntrySchema, insertSalespersonSchema } from "@shared/schema";
+import { insertSalesEntrySchema, insertSalespersonSchema, insertDailySummarySchema, insertIndividualSaleSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -10,9 +10,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const existingSalespersons = await storage.getAllSalespersons();
       if (existingSalespersons.length === 0) {
-        await storage.createSalesperson({ name: "Alice Johnson", email: "alice@company.com" });
-        await storage.createSalesperson({ name: "Bob Smith", email: "bob@company.com" });
-        await storage.createSalesperson({ name: "Carol Davis", email: "carol@company.com" });
+        await storage.createSalesperson({ name: "Gowri", email: "gowri@company.com" });
+        await storage.createSalesperson({ name: "Assistant Manager", email: "assistant@company.com" });
+        await storage.createSalesperson({ name: "Sales Executive", email: "sales@company.com" });
       }
       res.json({ message: "Initialized successfully" });
     } catch (error) {

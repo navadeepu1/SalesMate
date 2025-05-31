@@ -30,7 +30,7 @@ export default function HistoricalData() {
         toDate: filters.toDate,
       });
       
-      if (filters.salespersonId) {
+      if (filters.salespersonId && filters.salespersonId !== "all") {
         params.append('salespersonId', filters.salespersonId);
       }
       
@@ -147,7 +147,7 @@ export default function HistoricalData() {
                   <SelectValue placeholder="All Salespersons" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Salespersons</SelectItem>
+                  <SelectItem value="all">All Salespersons</SelectItem>
                   {salespersons.map((person: any) => (
                     <SelectItem key={person.id} value={person.id.toString()}>
                       {person.name}

@@ -1,10 +1,16 @@
 import { 
   salespersons, 
-  salesEntries, 
+  salesEntries,
+  dailySummaries,
+  individualSales,
   type Salesperson, 
   type InsertSalesperson,
   type SalesEntry,
   type InsertSalesEntry,
+  type DailySummary,
+  type InsertDailySummary,
+  type IndividualSale,
+  type InsertIndividualSale,
   users,
   type User,
   type InsertUser 
@@ -39,6 +45,14 @@ export interface IStorage {
     expenses: number;
     net: number;
   }>>;
+  
+  // Daily summary methods
+  createOrUpdateDailySummary(summary: InsertDailySummary): Promise<DailySummary>;
+  getDailySummaryByDate(date: string): Promise<DailySummary | undefined>;
+  
+  // Individual sales methods
+  createIndividualSale(sale: InsertIndividualSale): Promise<IndividualSale>;
+  getIndividualSalesByEntry(salesEntryId: number): Promise<IndividualSale[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -163,12 +177,55 @@ export class DatabaseStorage implements IStorage {
       .groupBy(salespersons.id, salespersons.name, salespersons.email);
 
     return results.map(result => ({
-      salesperson: result.salesperson,
+      salesperson: result.salesperson!,
       cash: Number(result.cash),
       phonepe: Number(result.phonepe),
       expenses: Number(result.expenses),
       net: Number(result.cash) + Number(result.phonepe) - Number(result.expenses),
     }));
+  }
+
+  async createOrUpdateDailySummary(summary: InsertDailySummary): Promise<DailySummary> {
+    const existing = await this.getDailySummaryByDate(summary.date);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(dailySummaries)
+        .set(summary)
+        .where(eq(dailySummaries.date, summary.date))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(dailySummaries)
+        .values(summary)
+        .returning();
+      return created;
+    }
+  }
+
+  async getDailySummaryByDate(date: string): Promise<DailySummary | undefined> {
+    const [summary] = await db
+      .select()
+      .from(dailySummaries)
+      .where(eq(dailySummaries.date, date));
+    return summary || undefined;
+  }
+
+  async createIndividualSale(sale: InsertIndividualSale): Promise<IndividualSale> {
+    const [created] = await db
+      .insert(individualSales)
+      .values(sale)
+      .returning();
+    return created;
+  }
+
+  async getIndividualSalesByEntry(salesEntryId: number): Promise<IndividualSale[]> {
+    return await db
+      .select()
+      .from(individualSales)
+      .where(eq(individualSales.salesEntryId, salesEntryId))
+      .orderBy(desc(individualSales.createdAt));
   }
 }
 
