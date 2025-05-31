@@ -111,7 +111,7 @@ export default function HistoricalData() {
   });
 
   const handleDelete = (id: number, date: string, salesperson: string) => {
-    if (window.confirm(`Are you sure you want to delete the sales record from ${formatDate(date)} by ${salesperson}? This action cannot be undone.`)) {
+    if (window.confirm(`Are you sure you want to delete the sales record from ${formatDate(date)} by ${salesperson || 'Unknown Salesperson'}? This action cannot be undone.`)) {
       deleteMutation.mutate(id);
     }
   };
@@ -142,7 +142,7 @@ export default function HistoricalData() {
       const net = parseFloat(record.cashCollected) + parseFloat(record.phonepeCollected) - parseFloat(record.expenses);
       return [
         formatDate(record.date),
-        record.salesperson.name,
+        record.salesperson?.name || 'Unknown Salesperson',
         `${parseFloat(record.cashCollected).toLocaleString('en-IN')} rupees`,
         `${parseFloat(record.phonepeCollected).toLocaleString('en-IN')} rupees`,
         `${parseFloat(record.expenses).toLocaleString('en-IN')} rupees`,
@@ -246,7 +246,7 @@ export default function HistoricalData() {
                   const net = parseFloat(record.cashCollected) + parseFloat(record.phonepeCollected) - parseFloat(record.expenses);
                   return [
                     formatDate(record.date),
-                    record.salesperson.name,
+                    record.salesperson?.name || 'Unknown Salesperson',
                     `${parseFloat(record.cashCollected).toLocaleString('en-IN')} rupees`,
                     `${parseFloat(record.phonepeCollected).toLocaleString('en-IN')} rupees`,
                     `${parseFloat(record.expenses).toLocaleString('en-IN')} rupees`,
@@ -298,7 +298,7 @@ export default function HistoricalData() {
                       return (
                         <tr key={record.id} className="border-b border-gray-100 hover:bg-muted/30">
                           <td className="py-4 px-6 text-sm">{formatDate(record.date)}</td>
-                          <td className="py-4 px-6 text-sm font-medium">{record.salesperson.name}</td>
+                          <td className="py-4 px-6 text-sm font-medium">{record.salesperson?.name || 'Unknown Salesperson'}</td>
                           <td className="text-right py-4 px-6 text-sm money-positive">
                             {formatCurrency(record.cashCollected)}
                           </td>
@@ -318,7 +318,7 @@ export default function HistoricalData() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(record.id, record.date, record.salesperson.name)}
+                              onClick={() => handleDelete(record.id, record.date, record.salesperson?.name || 'Unknown Salesperson')}
                               disabled={deleteMutation.isPending}
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
