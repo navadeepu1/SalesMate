@@ -229,9 +229,9 @@ export default function DailyEntry() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-4xl mx-auto">
         {/* Entry Form */}
-        <div className="lg:col-span-2">
+        <div>
           <Card className="business-card p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-foreground">Daily Sales Entry</h2>
@@ -748,62 +748,6 @@ export default function DailyEntry() {
                 </form>
               </Form>
             )}
-          </Card>
-        </div>
-
-        {/* Quick Summary & Recent Entries */}
-        <div className="space-y-6">
-          <Card className="business-card p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Today's Summary</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Cash</span>
-                <span className="money-positive">{formatCurrency(todaySummary.totalCash)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total PhonePe</span>
-                <span className="money-positive">{formatCurrency(todaySummary.totalPhonepe)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Expenses</span>
-                <span className="money-negative">{formatCurrency(todaySummary.totalExpenses)}</span>
-              </div>
-              <hr className="border-border" />
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-foreground">Net Collection</span>
-                <span className="money-neutral text-lg">{formatCurrency(todaySummary.netTotal)}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="business-card p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Recent Entries</h3>
-            <div className="space-y-3">
-              {todayEntries.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No entries recorded today
-                </p>
-              ) : (
-                todayEntries.slice(0, 5).map((entry: any) => {
-                  const total = parseFloat(entry.cashCollected) + parseFloat(entry.phonepeCollected) - parseFloat(entry.expenses);
-                  return (
-                    <div key={entry.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                      <div>
-                        <p className="text-sm font-medium">{entry.salesperson.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(entry.createdAt).toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit', 
-                            hour12: true 
-                          })}
-                        </p>
-                      </div>
-                      <span className="money-positive">{formatCurrency(total)}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
           </Card>
         </div>
       </div>
