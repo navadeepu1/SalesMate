@@ -178,13 +178,21 @@ export default function DailyEntry() {
     }, 0);
     
     const closingBalance = openingCash + totalCollection - totalSales;
-    summaryForm.setValue("closingBalance", closingBalance.toString());
+    const currentClosingBalance = summaryForm.watch("closingBalance");
+    
+    // Only update if the value has actually changed to prevent infinite loop
+    if (currentClosingBalance !== closingBalance.toString()) {
+      summaryForm.setValue("closingBalance", closingBalance.toString());
+    }
   };
 
   // Watch for changes to auto-calculate closing balance
   useEffect(() => {
-    const subscription = summaryForm.watch(() => {
-      calculateClosingBalance();
+    const subscription = summaryForm.watch((value, { name }) => {
+      // Only recalculate if the changed field is not closingBalance itself
+      if (name !== "closingBalance") {
+        calculateClosingBalance();
+      }
     });
     return () => subscription.unsubscribe();
   }, [summaryForm, fields]);
