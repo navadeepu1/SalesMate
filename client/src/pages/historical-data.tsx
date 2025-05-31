@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { ExportButton } from "@/components/export-button";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 export default function HistoricalData() {
+  const { toast } = useToast();
   const [filters, setFilters] = useState({
     fromDate: (() => {
       const date = new Date();
@@ -76,6 +79,42 @@ export default function HistoricalData() {
   };
 
   const runningTotals = calculateRunningTotals();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/sales-entries/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete sales entry');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Sales record deleted successfully",
+      });
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/sales-entries"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete sales record",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDelete = (id: number, date: string, salesperson: string) => {
+    if (window.confirm(`Are you sure you want to delete the sales record from ${formatDate(date)} by ${salesperson}? This action cannot be undone.`)) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   const handleExportData = () => {
     const runningTotals = calculateRunningTotals();
@@ -250,6 +289,7 @@ export default function HistoricalData() {
                       <th className="text-right py-3 px-6 font-medium text-muted-foreground">Expenses</th>
                       <th className="text-right py-3 px-6 font-medium text-muted-foreground">Net</th>
                       <th className="text-left py-3 px-6 font-medium text-muted-foreground">Notes</th>
+                      <th className="text-center py-3 px-6 font-medium text-muted-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -273,6 +313,17 @@ export default function HistoricalData() {
                           </td>
                           <td className="py-4 px-6 text-sm text-muted-foreground max-w-xs truncate">
                             {record.notes || '-'}
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(record.id, record.date, record.salesperson.name)}
+                              disabled={deleteMutation.isPending}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </td>
                         </tr>
                       );

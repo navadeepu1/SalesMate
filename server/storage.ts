@@ -53,6 +53,9 @@ export interface IStorage {
   // Individual sales methods
   createIndividualSale(sale: InsertIndividualSale): Promise<IndividualSale>;
   getIndividualSalesByEntry(salesEntryId: number): Promise<IndividualSale[]>;
+
+  // Delete methods
+  deleteSalesEntry(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -227,6 +230,13 @@ export class DatabaseStorage implements IStorage {
       .from(individualSales)
       .where(eq(individualSales.salesEntryId, salesEntryId))
       .orderBy(desc(individualSales.createdAt));
+  }
+
+  async deleteSalesEntry(id: number): Promise<void> {
+    // First delete related individual sales
+    await db.delete(individualSales).where(eq(individualSales.salesEntryId, id));
+    // Then delete the sales entry
+    await db.delete(salesEntries).where(eq(salesEntries.id, id));
   }
 }
 

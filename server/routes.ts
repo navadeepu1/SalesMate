@@ -188,6 +188,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete sales entry
+  app.delete("/api/sales-entries/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSalesEntry(parseInt(id));
+      res.json({ message: "Sales entry deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete sales entry", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
