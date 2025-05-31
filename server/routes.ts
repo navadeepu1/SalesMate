@@ -113,6 +113,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create or update daily summary
+  app.post("/api/daily-summary", async (req, res) => {
+    try {
+      const validatedData = insertDailySummarySchema.parse(req.body);
+      const summary = await storage.createOrUpdateDailySummary(validatedData);
+      res.json(summary);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Validation failed", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to save daily summary", error: error.message });
+      }
+    }
+  });
+
+  // Get daily summary by date
+  app.get("/api/daily-summary-detailed/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const summary = await storage.getDailySummaryByDate(date);
+      res.json(summary || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch daily summary", error: error.message });
+    }
+  });
+
+  // Create individual sale
+  app.post("/api/individual-sales", async (req, res) => {
+    try {
+      const validatedData = insertIndividualSaleSchema.parse(req.body);
+      const sale = await storage.createIndividualSale(validatedData);
+      res.status(201).json(sale);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Validation failed", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create individual sale", error: error.message });
+      }
+    }
+  });
+
+  // Get individual sales by entry
+  app.get("/api/individual-sales/:salesEntryId", async (req, res) => {
+    try {
+      const { salesEntryId } = req.params;
+      const sales = await storage.getIndividualSalesByEntry(parseInt(salesEntryId));
+      res.json(sales);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch individual sales", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
