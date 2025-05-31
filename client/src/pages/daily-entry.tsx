@@ -16,12 +16,18 @@ import { Save, Undo, Wallet, Smartphone, Receipt, Plus, Trash2, Calculator, Tren
 import { z } from "zod";
 
 const formSchema = insertSalesEntrySchema.extend({
-  salespersonId: z.string().min(1, "Please select a salesperson"),
+  salespersonId: z.string().optional(),
+  manualSalespersonName: z.string().optional(),
   individualPayments: z.array(z.object({
     customerName: z.string().min(1, "Customer name is required"),
     amount: z.string().min(1, "Amount is required"),
     paymentMethod: z.enum(["cash", "phonepe"]),
   })).optional(),
+}).refine((data) => {
+  return data.salespersonId || data.manualSalespersonName;
+}, {
+  message: "Please either select a salesperson or enter a manual name",
+  path: ["salespersonId"],
 });
 
 const dailySummarySchema = insertDailySummarySchema.extend({
@@ -39,6 +45,7 @@ export default function DailyEntry() {
   const { toast } = useToast();
   const [todayDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [showDailySummary, setShowDailySummary] = useState(false);
+  const [useManualSalesperson, setUseManualSalesperson] = useState(false);
 
   // Initialize data
   useQuery({
@@ -67,6 +74,7 @@ export default function DailyEntry() {
     defaultValues: {
       date: todayDate,
       salespersonId: "",
+      manualSalespersonName: "",
       cashCollected: "0",
       phonepeCollected: "0",
       expenses: "0",
@@ -99,9 +107,22 @@ export default function DailyEntry() {
 
   const createEntryMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      let salespersonId: number;
+      
+      if (data.manualSalespersonName) {
+        // Create a new salesperson with the manual name
+        const newSalesperson = await apiRequest("POST", "/api/salespersons", {
+          name: data.manualSalespersonName,
+          email: null,
+        });
+        salespersonId = newSalesperson.id;
+      } else {
+        salespersonId = parseInt(data.salespersonId!);
+      }
+
       const payload = {
         ...data,
-        salespersonId: parseInt(data.salespersonId),
+        salespersonId,
       };
       return apiRequest("POST", "/api/sales-entries", payload);
     },
@@ -113,12 +134,14 @@ export default function DailyEntry() {
       form.reset({
         date: todayDate,
         salespersonId: "",
+        manualSalespersonName: "",
         cashCollected: "0",
         phonepeCollected: "0",
         expenses: "0",
         notes: "",
         individualPayments: [],
       });
+      setUseManualSalesperson(false);
       // Real-time updates - invalidate all related queries for automatic refresh
       queryClient.invalidateQueries({ queryKey: ["/api/sales-entries/date"] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-summary"] });
@@ -179,12 +202,14 @@ export default function DailyEntry() {
     form.reset({
       date: todayDate,
       salespersonId: "",
+      manualSalespersonName: "",
       cashCollected: "0",
       phonepeCollected: "0",
       expenses: "0",
       notes: "",
       individualPayments: [],
     });
+    setUseManualSalesperson(false);
   };
 
   const addIndividualPayment = () => {
@@ -261,30 +286,67 @@ export default function DailyEntry() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="salespersonId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Salesperson</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="business-input">
-                              <SelectValue placeholder="Select Salesperson" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {salespersons.map((person: any) => (
-                              <SelectItem key={person.id} value={person.id.toString()}>
-                                {person.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Salesperson</FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setUseManualSalesperson(!useManualSalesperson);
+                          // Clear both fields when toggling
+                          form.setValue("salespersonId", "");
+                          form.setValue("manualSalespersonName", "");
+                        }}
+                      >
+                        {useManualSalesperson ? "Select from List" : "Enter Manually"}
+                      </Button>
+                    </div>
+                    
+                    {!useManualSalesperson ? (
+                      <FormField
+                        control={form.control}
+                        name="salespersonId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="business-input">
+                                  <SelectValue placeholder="Select Salesperson" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {salespersons.map((person: any) => (
+                                  <SelectItem key={person.id} value={person.id.toString()}>
+                                    {person.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name="manualSalespersonName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter salesperson name"
+                                {...field}
+                                className="business-input"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     )}
-                  />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

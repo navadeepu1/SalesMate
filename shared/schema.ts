@@ -75,6 +75,7 @@ export const insertSalesEntrySchema = createInsertSchema(salesEntries).omit({
   expenses: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
     message: "Expenses must be a valid positive number",
   }),
+  manualSalespersonName: z.string().optional(),
 });
 
 export const insertDailySummarySchema = createInsertSchema(dailySummaries).omit({
