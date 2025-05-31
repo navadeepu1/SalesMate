@@ -86,6 +86,10 @@ export class DatabaseStorage implements IStorage {
     return salesperson;
   }
 
+  async deleteAllSalespersons(): Promise<void> {
+    await db.delete(salespersons);
+  }
+
   async createSalesEntry(entry: InsertSalesEntry): Promise<SalesEntry> {
     const [newEntry] = await db.insert(salesEntries).values(entry).returning();
     return newEntry;

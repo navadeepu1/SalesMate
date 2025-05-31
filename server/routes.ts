@@ -5,15 +5,9 @@ import { insertSalesEntrySchema, insertSalespersonSchema, insertDailySummarySche
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize some default salespersons if they don't exist
+  // Initialize application
   app.get("/api/init", async (req, res) => {
     try {
-      const existingSalespersons = await storage.getAllSalespersons();
-      if (existingSalespersons.length === 0) {
-        await storage.createSalesperson({ name: "Gowri", email: "gowri@company.com" });
-        await storage.createSalesperson({ name: "Assistant Manager", email: "assistant@company.com" });
-        await storage.createSalesperson({ name: "Sales Executive", email: "sales@company.com" });
-      }
       res.json({ message: "Initialized successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to initialize", error: error.message });
@@ -42,6 +36,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to create salesperson", error: error.message });
       }
+    }
+  });
+
+  // Clear all salespersons
+  app.delete("/api/salespersons", async (req, res) => {
+    try {
+      await storage.deleteAllSalespersons();
+      res.json({ message: "All salespersons cleared successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear salespersons", error: error.message });
     }
   });
 
