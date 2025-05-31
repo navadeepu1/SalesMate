@@ -30,26 +30,26 @@ export default function HistoricalData() {
         fromDate: filters.fromDate,
         toDate: filters.toDate,
       });
-      
+
       if (filters.salespersonId && filters.salespersonId !== "all") {
         params.append('salespersonId', filters.salespersonId);
       }
-      
+
       const response = await fetch(`/api/sales-entries?${params}`, {
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch historical data');
       }
-      
+
       return response.json();
     },
   });
 
   const formatCurrency = (amount: number | string) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return `₹${num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return `${num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} rupees`;
   };
 
   const formatDate = (dateString: string) => {
@@ -65,7 +65,7 @@ export default function HistoricalData() {
       const cash = parseFloat(record.cashCollected);
       const phonepe = parseFloat(record.phonepeCollected);
       const expenses = parseFloat(record.expenses);
-      
+
       return {
         cash: acc.cash + cash,
         phonepe: acc.phonepe + phonepe,
@@ -80,7 +80,7 @@ export default function HistoricalData() {
   const handleExportData = () => {
     const runningTotals = calculateRunningTotals();
     const selectedSalesperson = salespersons.find((p: any) => p.id.toString() === filters.salespersonId);
-    
+
     // Enhanced export with header information and summary
     const reportHeader = [
       ['Historical Sales Data Export'],
@@ -90,10 +90,10 @@ export default function HistoricalData() {
       [`Total Records: ${historicalData.length}`],
       [''],
       ['SUMMARY TOTALS'],
-      ['Total Cash Collected:', `₹${runningTotals.cash.toLocaleString('en-IN')}`],
-      ['Total PhonePe Collected:', `₹${runningTotals.phonepe.toLocaleString('en-IN')}`],
-      ['Total Expenses:', `₹${runningTotals.expenses.toLocaleString('en-IN')}`],
-      ['Net Total:', `₹${runningTotals.net.toLocaleString('en-IN')}`],
+      ['Total Cash Collected:', `${runningTotals.cash.toLocaleString('en-IN')} rupees`],
+      ['Total PhonePe Collected:', `${runningTotals.phonepe.toLocaleString('en-IN')} rupees`],
+      ['Total Expenses:', `${runningTotals.expenses.toLocaleString('en-IN')} rupees`],
+      ['Net Total:', `${runningTotals.net.toLocaleString('en-IN')} rupees`],
       [''],
       ['DETAILED TRANSACTION RECORDS']
     ];
@@ -104,19 +104,19 @@ export default function HistoricalData() {
       return [
         formatDate(record.date),
         record.salesperson.name,
-        `₹${parseFloat(record.cashCollected).toLocaleString('en-IN')}`,
-        `₹${parseFloat(record.phonepeCollected).toLocaleString('en-IN')}`,
-        `₹${parseFloat(record.expenses).toLocaleString('en-IN')}`,
-        `₹${net.toLocaleString('en-IN')}`,
+        `${parseFloat(record.cashCollected).toLocaleString('en-IN')} rupees`,
+        `${parseFloat(record.phonepeCollected).toLocaleString('en-IN')} rupees`,
+        `${parseFloat(record.expenses).toLocaleString('en-IN')} rupees`,
+        `${net.toLocaleString('en-IN')} rupees`,
         record.notes || 'No notes',
         new Date(record.createdAt).toLocaleString()
       ];
     });
-    
+
     const csvContent = [...reportHeader, headers, ...rows]
       .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -208,10 +208,10 @@ export default function HistoricalData() {
                   return [
                     formatDate(record.date),
                     record.salesperson.name,
-                    `₹${parseFloat(record.cashCollected).toLocaleString('en-IN')}`,
-                    `₹${parseFloat(record.phonepeCollected).toLocaleString('en-IN')}`,
-                    `₹${parseFloat(record.expenses).toLocaleString('en-IN')}`,
-                    `₹${net.toLocaleString('en-IN')}`,
+                    `${parseFloat(record.cashCollected).toLocaleString('en-IN')} rupees`,
+                    `${parseFloat(record.phonepeCollected).toLocaleString('en-IN')} rupees`,
+                    `${parseFloat(record.expenses).toLocaleString('en-IN')} rupees`,
+                    `${net.toLocaleString('en-IN')} rupees`,
                     record.notes || 'No notes',
                     new Date(record.createdAt).toLocaleString()
                   ];
@@ -224,15 +224,15 @@ export default function HistoricalData() {
                   `Total Records: ${historicalData.length}`,
                   '',
                   'PERIOD SUMMARY',
-                  `Total Cash: ₹${runningTotals.cash.toLocaleString('en-IN')}`,
-                  `Total PhonePe: ₹${runningTotals.phonepe.toLocaleString('en-IN')}`,
-                  `Total Expenses: ₹${runningTotals.expenses.toLocaleString('en-IN')}`,
-                  `Net Total: ₹${runningTotals.net.toLocaleString('en-IN')}`
+                  `Total Cash: ${runningTotals.cash.toLocaleString('en-IN')} rupees`,
+                  `Total PhonePe: ${runningTotals.phonepe.toLocaleString('en-IN')} rupees`,
+                  `Total Expenses: ${runningTotals.expenses.toLocaleString('en-IN')} rupees`,
+                  `Net Total: ${runningTotals.net.toLocaleString('en-IN')} rupees`
                 ]}
               />
             </div>
           </div>
-          
+
           {historicalData.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No records found for the selected criteria</p>
@@ -280,7 +280,7 @@ export default function HistoricalData() {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Running Totals */}
               <div className="bg-muted/50 px-6 py-4 border-t border-border">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

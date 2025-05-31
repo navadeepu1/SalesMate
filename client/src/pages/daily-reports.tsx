@@ -17,8 +17,9 @@ export default function DailyReports() {
     queryKey: ["/api/salesperson-summary", reportDate],
   });
 
-  const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const formatCurrency = (amount: number | string) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return `${num.toLocaleString('en-IN')} rupees`;
   };
 
   const getInitials = (name: string) => {
@@ -51,17 +52,17 @@ export default function DailyReports() {
                 headers={['Salesperson', 'Cash Collected', 'PhonePe Collected', 'Expenses', 'Net Total']}
                 formatRow={(person: any) => [
                   person.salesperson.name,
-                  `₹${person.cash.toLocaleString('en-IN')}`,
-                  `₹${person.phonepe.toLocaleString('en-IN')}`,
-                  `₹${person.expenses.toLocaleString('en-IN')}`,
-                  `₹${person.net.toLocaleString('en-IN')}`
+                  `${person.cash.toLocaleString('en-IN')} rupees`,
+                  `${person.phonepe.toLocaleString('en-IN')} rupees`,
+                  `${person.expenses.toLocaleString('en-IN')} rupees`,
+                  `${person.net.toLocaleString('en-IN')} rupees`
                 ]}
                 summaryInfo={[
                   `Date: ${new Date(reportDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
-                  `Total Cash: ₹${dailySummary.totalCash.toLocaleString('en-IN')}`,
-                  `Total PhonePe: ₹${dailySummary.totalPhonepe.toLocaleString('en-IN')}`,
-                  `Total Expenses: ₹${dailySummary.totalExpenses.toLocaleString('en-IN')}`,
-                  `Net Total: ₹${dailySummary.netTotal.toLocaleString('en-IN')}`
+                  `Total Cash: ${dailySummary.totalCash.toLocaleString('en-IN')} rupees`,
+                  `Total PhonePe: ${dailySummary.totalPhonepe.toLocaleString('en-IN')} rupees`,
+                  `Total Expenses: ${dailySummary.totalExpenses.toLocaleString('en-IN')} rupees`,
+                  `Net Total: ${dailySummary.netTotal.toLocaleString('en-IN')} rupees`
                 ]}
                 disabled={salespersonData.length === 0}
               />

@@ -28,7 +28,7 @@ export function downloadFile(content: string, filename: string, type: string = '
 
 export function formatCurrencyForExport(amount: number | string): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return `₹${num.toLocaleString('en-IN')}`;
+  return `${num.toLocaleString('en-IN')} rupees`;
 }
 
 export function formatDateForExport(dateString: string): string {

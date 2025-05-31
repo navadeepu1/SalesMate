@@ -200,7 +200,7 @@ export default function DailyEntry() {
     const openingCash = parseFloat(formValues.openingCash) || 0;
     const totalCollection = parseFloat(formValues.totalCollection) || 0;
     const totalSales = parseFloat(formValues.totalSales) || 0;
-    
+
     const closingBalance = openingCash + totalCollection - totalSales;
     summaryForm.setValue("closingBalance", closingBalance.toString(), { shouldValidate: false });
   }, [summaryForm]);
@@ -298,16 +298,13 @@ export default function DailyEntry() {
                           Cash Collected
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              className="business-input pl-8"
-                            />
-                          </div>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00 rupees"
+                            {...field}
+                            className="business-input"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -324,16 +321,13 @@ export default function DailyEntry() {
                           PhonePe Collected
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              className="business-input pl-8"
-                            />
-                          </div>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00 rupees"
+                            {...field}
+                            className="business-input"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -351,16 +345,13 @@ export default function DailyEntry() {
                         Expenses
                       </FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...field}
-                            className="business-input pl-8"
-                          />
-                        </div>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00 rupees"
+                          {...field}
+                          className="business-input"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -434,16 +425,13 @@ export default function DailyEntry() {
                               <FormItem>
                                 <FormLabel>Amount</FormLabel>
                                 <FormControl>
-                                  <div className="relative">
-                                    <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      placeholder="0.00"
-                                      {...field}
-                                      className="business-input pl-8"
-                                    />
-                                  </div>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00 rupees"
+                                    {...field}
+                                    className="business-input"
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -538,16 +526,13 @@ export default function DailyEntry() {
                             Opening Cash Balance
                           </FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                {...field}
-                                className="business-input pl-8"
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 rupees"
+                              {...field}
+                              className="business-input"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -564,16 +549,13 @@ export default function DailyEntry() {
                             Total Sales Amount
                           </FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                {...field}
-                                className="business-input pl-8"
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 rupees"
+                              {...field}
+                              className="business-input"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -590,16 +572,13 @@ export default function DailyEntry() {
                             Total Collection
                           </FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                {...field}
-                                className="business-input pl-8"
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 rupees"
+                              {...field}
+                              className="business-input"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -616,16 +595,14 @@ export default function DailyEntry() {
                             Closing Balance (Auto-calculated)
                           </FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                className="business-input pl-8 bg-muted"
-                                readOnly
-                              />
-                            </div>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              {...field}
+                              className="business-input bg-muted"
+                              readOnly
+                              placeholder="0.00 rupees"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -681,16 +658,13 @@ export default function DailyEntry() {
                                 <FormItem>
                                   <FormLabel>Amount</FormLabel>
                                   <FormControl>
-                                    <div className="relative">
-                                      <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
-                                      <Input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        {...field}
-                                        className="business-input pl-8"
-                                      />
-                                    </div>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00 rupees"
+                                      {...field}
+                                      className="business-input"
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
