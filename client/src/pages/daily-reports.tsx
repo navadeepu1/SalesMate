@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wallet, Smartphone, Receipt, TrendingUp, Download } from "lucide-react";
+import { ExportButton } from "@/components/export-button";
+import { Wallet, Smartphone, Receipt, TrendingUp } from "lucide-react";
 
 export default function DailyReports() {
   const [reportDate, setReportDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -24,43 +25,7 @@ export default function DailyReports() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  const handleExport = () => {
-    // Enhanced CSV export with better formatting and summary data
-    const reportSummary = [
-      ['Daily Sales Report'],
-      [`Date: ${new Date(reportDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`],
-      ['Generated on:', new Date().toLocaleString()],
-      [''],
-      ['SUMMARY TOTALS'],
-      ['Total Cash Collected:', `₹${dailySummary.totalCash.toLocaleString('en-IN')}`],
-      ['Total PhonePe Collected:', `₹${dailySummary.totalPhonepe.toLocaleString('en-IN')}`],
-      ['Total Expenses:', `₹${dailySummary.totalExpenses.toLocaleString('en-IN')}`],
-      ['Net Total:', `₹${dailySummary.netTotal.toLocaleString('en-IN')}`],
-      [''],
-      ['SALESPERSON BREAKDOWN']
-    ];
-    
-    const headers = ['Salesperson', 'Cash Collected', 'PhonePe Collected', 'Expenses', 'Net Total'];
-    const rows = salespersonData.map((person: any) => [
-      person.salesperson.name,
-      `₹${person.cash.toLocaleString('en-IN')}`,
-      `₹${person.phonepe.toLocaleString('en-IN')}`,
-      `₹${person.expenses.toLocaleString('en-IN')}`,
-      `₹${person.net.toLocaleString('en-IN')}`
-    ]);
-    
-    const csvContent = [...reportSummary, headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Daily-Sales-Report-${reportDate}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -79,10 +44,27 @@ export default function DailyReports() {
                 onChange={(e) => setReportDate(e.target.value)}
                 className="business-input"
               />
-              <Button onClick={handleExport} className="business-button-primary">
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
+              <ExportButton
+                data={salespersonData}
+                filename={`Daily-Sales-Report-${reportDate}`}
+                title="Daily Sales Report"
+                headers={['Salesperson', 'Cash Collected', 'PhonePe Collected', 'Expenses', 'Net Total']}
+                formatRow={(person: any) => [
+                  person.salesperson.name,
+                  `₹${person.cash.toLocaleString('en-IN')}`,
+                  `₹${person.phonepe.toLocaleString('en-IN')}`,
+                  `₹${person.expenses.toLocaleString('en-IN')}`,
+                  `₹${person.net.toLocaleString('en-IN')}`
+                ]}
+                summaryInfo={[
+                  `Date: ${new Date(reportDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
+                  `Total Cash: ₹${dailySummary.totalCash.toLocaleString('en-IN')}`,
+                  `Total PhonePe: ₹${dailySummary.totalPhonepe.toLocaleString('en-IN')}`,
+                  `Total Expenses: ₹${dailySummary.totalExpenses.toLocaleString('en-IN')}`,
+                  `Net Total: ₹${dailySummary.netTotal.toLocaleString('en-IN')}`
+                ]}
+                disabled={salespersonData.length === 0}
+              />
             </div>
           </div>
         </Card>

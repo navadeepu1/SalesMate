@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Download } from "lucide-react";
+import { Search } from "lucide-react";
+import { ExportButton } from "@/components/export-button";
 
 export default function HistoricalData() {
   const [filters, setFilters] = useState({
@@ -197,15 +198,38 @@ export default function HistoricalData() {
               <span className="text-sm text-muted-foreground">
                 Showing {historicalData.length} records
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportData}
-                disabled={historicalData.length === 0}
-              >
-                <Download className="mr-1 h-4 w-4" />
-                Export CSV
-              </Button>
+              <ExportButton
+                data={historicalData}
+                filename={`Historical-Sales-Data-${filters.fromDate}-to-${filters.toDate}`}
+                title="Historical Sales Data Export"
+                headers={['Date', 'Salesperson', 'Cash Collected', 'PhonePe Collected', 'Expenses', 'Net Amount', 'Notes', 'Entry Time']}
+                formatRow={(record: any) => {
+                  const net = parseFloat(record.cashCollected) + parseFloat(record.phonepeCollected) - parseFloat(record.expenses);
+                  return [
+                    formatDate(record.date),
+                    record.salesperson.name,
+                    `₹${parseFloat(record.cashCollected).toLocaleString('en-IN')}`,
+                    `₹${parseFloat(record.phonepeCollected).toLocaleString('en-IN')}`,
+                    `₹${parseFloat(record.expenses).toLocaleString('en-IN')}`,
+                    `₹${net.toLocaleString('en-IN')}`,
+                    record.notes || 'No notes',
+                    new Date(record.createdAt).toLocaleString()
+                  ];
+                }}
+                summaryInfo={[
+                  `Period: ${formatDate(filters.fromDate)} to ${formatDate(filters.toDate)}`,
+                  `Salesperson Filter: ${filters.salespersonId && filters.salespersonId !== "all" 
+                    ? salespersons.find((p: any) => p.id.toString() === filters.salespersonId)?.name 
+                    : "All Salespersons"}`,
+                  `Total Records: ${historicalData.length}`,
+                  '',
+                  'PERIOD SUMMARY',
+                  `Total Cash: ₹${runningTotals.cash.toLocaleString('en-IN')}`,
+                  `Total PhonePe: ₹${runningTotals.phonepe.toLocaleString('en-IN')}`,
+                  `Total Expenses: ₹${runningTotals.expenses.toLocaleString('en-IN')}`,
+                  `Net Total: ₹${runningTotals.net.toLocaleString('en-IN')}`
+                ]}
+              />
             </div>
           </div>
           
