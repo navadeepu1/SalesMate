@@ -48,8 +48,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create sales entry
   app.post("/api/sales-entries", async (req, res) => {
     try {
-      const validatedData = insertSalesEntrySchema.parse(req.body);
+      const { individualPayments, ...salesEntryData } = req.body;
+      const validatedData = insertSalesEntrySchema.parse(salesEntryData);
+      
+      // Create the sales entry first
       const salesEntry = await storage.createSalesEntry(validatedData);
+      
+      // If there are individual payments, create them
+      if (individualPayments && Array.isArray(individualPayments) && individualPayments.length > 0) {
+        for (const payment of individualPayments) {
+          if (payment.customerName && payment.amount && payment.paymentMethod) {
+            const validatedPayment = insertIndividualSaleSchema.parse({
+              salesEntryId: salesEntry.id,
+              customerName: payment.customerName,
+              amount: payment.amount,
+              paymentMethod: payment.paymentMethod,
+            });
+            await storage.createIndividualSale(validatedPayment);
+          }
+        }
+      }
+      
       res.status(201).json(salesEntry);
     } catch (error) {
       if (error instanceof z.ZodError) {

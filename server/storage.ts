@@ -23,11 +23,11 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Salesperson methods
   getAllSalespersons(): Promise<Salesperson[]>;
   createSalesperson(salesperson: InsertSalesperson): Promise<Salesperson>;
-  
+
   // Sales entry methods
   createSalesEntry(entry: InsertSalesEntry): Promise<SalesEntry>;
   getSalesEntriesByDate(date: string): Promise<(SalesEntry & { salesperson: Salesperson })[]>;
@@ -45,11 +45,11 @@ export interface IStorage {
     expenses: number;
     net: number;
   }>>;
-  
+
   // Daily summary methods
   createOrUpdateDailySummary(summary: InsertDailySummary): Promise<DailySummary>;
   getDailySummaryByDate(date: string): Promise<DailySummary | undefined>;
-  
+
   // Individual sales methods
   createIndividualSale(sale: InsertIndividualSale): Promise<IndividualSale>;
   getIndividualSalesByEntry(salesEntryId: number): Promise<IndividualSale[]>;
@@ -87,11 +87,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSalesEntry(entry: InsertSalesEntry): Promise<SalesEntry> {
-    const [salesEntry] = await db
-      .insert(salesEntries)
-      .values(entry)
-      .returning();
-    return salesEntry;
+    const [newEntry] = await db.insert(salesEntries).values(entry).returning();
+    return newEntry;
   }
 
   async getSalesEntriesByDate(date: string): Promise<(SalesEntry & { salesperson: Salesperson })[]> {
@@ -187,7 +184,7 @@ export class DatabaseStorage implements IStorage {
 
   async createOrUpdateDailySummary(summary: InsertDailySummary): Promise<DailySummary> {
     const existing = await this.getDailySummaryByDate(summary.date);
-    
+
     if (existing) {
       const [updated] = await db
         .update(dailySummaries)

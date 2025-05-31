@@ -17,6 +17,11 @@ import { z } from "zod";
 
 const formSchema = insertSalesEntrySchema.extend({
   salespersonId: z.string().min(1, "Please select a salesperson"),
+  individualPayments: z.array(z.object({
+    customerName: z.string().min(1, "Customer name is required"),
+    amount: z.string().min(1, "Amount is required"),
+    paymentMethod: z.enum(["cash", "phonepe"]),
+  })).optional(),
 });
 
 const dailySummarySchema = insertDailySummarySchema.extend({
@@ -66,6 +71,7 @@ export default function DailyEntry() {
       phonepeCollected: "0",
       expenses: "0",
       notes: "",
+      individualPayments: [],
     },
   });
 
@@ -84,6 +90,11 @@ export default function DailyEntry() {
   const { fields, append, remove } = useFieldArray({
     control: summaryForm.control,
     name: "individualSales",
+  });
+
+  const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({
+    control: form.control,
+    name: "individualPayments",
   });
 
   const createEntryMutation = useMutation({
@@ -106,6 +117,7 @@ export default function DailyEntry() {
         phonepeCollected: "0",
         expenses: "0",
         notes: "",
+        individualPayments: [],
       });
       queryClient.invalidateQueries({ queryKey: ["/api/sales-entries/date"] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-summary"] });
@@ -163,6 +175,15 @@ export default function DailyEntry() {
       phonepeCollected: "0",
       expenses: "0",
       notes: "",
+      individualPayments: [],
+    });
+  };
+
+  const addIndividualPayment = () => {
+    appendPayment({
+      customerName: "",
+      amount: "",
+      paymentMethod: "cash",
     });
   };
 
@@ -367,6 +388,108 @@ export default function DailyEntry() {
                     </FormItem>
                   )}
                 />
+
+                {/* Individual Customer Payments Section */}
+                <div className="border-t border-border pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-md font-medium text-foreground">Individual Customer Payments</h3>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addIndividualPayment}
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Add Customer Payment
+                    </Button>
+                  </div>
+
+                  {paymentFields.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No individual payments added yet. Click "Add Customer Payment" to start tracking.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {paymentFields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-border rounded-lg">
+                          <FormField
+                            control={form.control}
+                            name={`individualPayments.${index}.customerName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Customer Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Enter customer name"
+                                    {...field}
+                                    className="business-input"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`individualPayments.${index}.amount`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Amount</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-2 text-muted-foreground">₹</span>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      {...field}
+                                      className="business-input pl-8"
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`individualPayments.${index}.paymentMethod`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Payment Method</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="business-input">
+                                      <SelectValue placeholder="Select method" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="cash">Cash</SelectItem>
+                                    <SelectItem value="phonepe">PhonePe</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex items-end">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removePayment(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between pt-6 border-t border-border">
                   <Button
