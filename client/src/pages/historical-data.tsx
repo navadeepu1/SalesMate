@@ -77,29 +77,53 @@ export default function HistoricalData() {
   const runningTotals = calculateRunningTotals();
 
   const handleExportData = () => {
-    const headers = ['Date', 'Salesperson', 'Cash', 'PhonePe', 'Expenses', 'Net', 'Notes'];
+    const runningTotals = calculateRunningTotals();
+    const selectedSalesperson = salespersons.find((p: any) => p.id.toString() === filters.salespersonId);
+    
+    // Enhanced export with header information and summary
+    const reportHeader = [
+      ['Historical Sales Data Export'],
+      [`Date Range: ${formatDate(filters.fromDate)} to ${formatDate(filters.toDate)}`],
+      [`Salesperson Filter: ${selectedSalesperson ? selectedSalesperson.name : 'All Salespersons'}`],
+      [`Generated on: ${new Date().toLocaleString()}`],
+      [`Total Records: ${historicalData.length}`],
+      [''],
+      ['SUMMARY TOTALS'],
+      ['Total Cash Collected:', `₹${runningTotals.cash.toLocaleString('en-IN')}`],
+      ['Total PhonePe Collected:', `₹${runningTotals.phonepe.toLocaleString('en-IN')}`],
+      ['Total Expenses:', `₹${runningTotals.expenses.toLocaleString('en-IN')}`],
+      ['Net Total:', `₹${runningTotals.net.toLocaleString('en-IN')}`],
+      [''],
+      ['DETAILED TRANSACTION RECORDS']
+    ];
+
+    const headers = ['Date', 'Salesperson', 'Cash Collected', 'PhonePe Collected', 'Expenses', 'Net Amount', 'Notes', 'Entry Time'];
     const rows = historicalData.map((record: any) => {
       const net = parseFloat(record.cashCollected) + parseFloat(record.phonepeCollected) - parseFloat(record.expenses);
       return [
         formatDate(record.date),
         record.salesperson.name,
-        record.cashCollected,
-        record.phonepeCollected,
-        record.expenses,
-        net.toFixed(2),
-        record.notes || ''
+        `₹${parseFloat(record.cashCollected).toLocaleString('en-IN')}`,
+        `₹${parseFloat(record.phonepeCollected).toLocaleString('en-IN')}`,
+        `₹${parseFloat(record.expenses).toLocaleString('en-IN')}`,
+        `₹${net.toLocaleString('en-IN')}`,
+        record.notes || 'No notes',
+        new Date(record.createdAt).toLocaleString()
       ];
     });
     
-    const csvContent = [headers, ...rows]
+    const csvContent = [...reportHeader, headers, ...rows]
       .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `historical-data-${filters.fromDate}-to-${filters.toDate}.csv`;
+    const fileName = selectedSalesperson 
+      ? `Historical-Sales-Data-${selectedSalesperson.name}-${filters.fromDate}-to-${filters.toDate}.csv`
+      : `Historical-Sales-Data-All-${filters.fromDate}-to-${filters.toDate}.csv`;
+    a.download = fileName;
     a.click();
     window.URL.revokeObjectURL(url);
   };
