@@ -52,23 +52,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create sales entry
   app.post("/api/sales-entries", async (req, res) => {
     try {
-      const { individualPayments, manualSalespersonName, ...salesEntryData } = req.body;
+      const { individualPayments, ...salesEntryData } = req.body;
       
-      let finalSalespersonId = salesEntryData.salespersonId;
-      
-      // If manual salesperson name is provided, create or find the salesperson
-      if (manualSalespersonName && manualSalespersonName.trim()) {
-        const newSalesperson = await storage.createSalesperson({
-          name: manualSalespersonName.trim(),
-          email: null,
-        });
-        finalSalespersonId = newSalesperson.id;
-      }
-      
-      const validatedData = insertSalesEntrySchema.parse({
-        ...salesEntryData,
-        salespersonId: finalSalespersonId,
-      });
+      const validatedData = insertSalesEntrySchema.parse(salesEntryData);
       
       // Create the sales entry first
       const salesEntry = await storage.createSalesEntry(validatedData);

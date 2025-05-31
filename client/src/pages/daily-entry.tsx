@@ -39,7 +39,7 @@ export default function DailyEntry() {
   const { toast } = useToast();
   const [todayDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [showDailySummary, setShowDailySummary] = useState(false);
-  const [useManualSalesperson, setUseManualSalesperson] = useState(false);
+
 
   // Initialize data
   useQuery({
@@ -67,7 +67,7 @@ export default function DailyEntry() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: todayDate,
-      salespersonName: "",
+      salespersonName: "Gowri",
       cashCollected: "0",
       phonepeCollected: "0",
       expenses: "0",
@@ -100,22 +100,13 @@ export default function DailyEntry() {
 
   const createEntryMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      let salespersonId: number;
-      
-      if (data.manualSalespersonName) {
-        // Create a new salesperson with the manual name
-        const newSalesperson = await apiRequest("POST", "/api/salespersons", {
-          name: data.manualSalespersonName,
-          email: null,
-        });
-        salespersonId = newSalesperson.id;
-      } else {
-        salespersonId = parseInt(data.salespersonId!);
-      }
-
       const payload = {
-        ...data,
-        salespersonId,
+        date: data.date,
+        salespersonName: data.salespersonName,
+        cashCollected: data.cashCollected,
+        phonepeCollected: data.phonepeCollected,
+        expenses: data.expenses,
+        notes: data.notes || null,
       };
       return apiRequest("POST", "/api/sales-entries", payload);
     },
@@ -126,15 +117,13 @@ export default function DailyEntry() {
       });
       form.reset({
         date: todayDate,
-        salespersonId: "",
-        manualSalespersonName: "",
+        salespersonName: "",
         cashCollected: "0",
         phonepeCollected: "0",
         expenses: "0",
         notes: "",
         individualPayments: [],
       });
-      setUseManualSalesperson(false);
       // Real-time updates - invalidate all related queries for automatic refresh
       queryClient.invalidateQueries({ queryKey: ["/api/sales-entries/date"] });
       queryClient.invalidateQueries({ queryKey: ["/api/daily-summary"] });
@@ -194,15 +183,13 @@ export default function DailyEntry() {
   const handleReset = () => {
     form.reset({
       date: todayDate,
-      salespersonId: "",
-      manualSalespersonName: "",
+      salespersonName: "Gowri",
       cashCollected: "0",
       phonepeCollected: "0",
       expenses: "0",
       notes: "",
       individualPayments: [],
     });
-    setUseManualSalesperson(false);
   };
 
   const addIndividualPayment = () => {
